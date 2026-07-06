@@ -1,5 +1,13 @@
 import { Platform } from "react-native";
 import { useCallback, useRef, useState } from "react";
+import { useEffect } from "react";
+import { useSQLiteContext } from "expo-sqlite";
+
+import {
+  clearPersistedMessages,
+  loadPersistedMessages,
+  persistMessages,
+} from "@/db/chat-history";
 
 const DEFAULT_BACKEND_BASE_URL = Platform.select({
   android: "http://10.0.2.2:3001",
@@ -27,25 +35,59 @@ export interface ChatMessage {
 
 export type AIProvider = "openai" | "anthropic";
 
+function generateMessageId(prefix: string): string {
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
 export function useChat() {
+  const db = useSQLiteContext();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isLoadingHistory, setIsLoadingHistory] = useState(true);
   const abortRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const hydrate = async () => {
+      try {
+        const persistedMessages = await loadPersistedMessages(db);
+        if (!isMounted) return;
+        setMessages(persistedMessages);
+      } catch (error) {
+        console.warn("[Chat] Failed to load persisted history", error);
+      } finally {
+        if (isMounted) {
+          setIsLoadingHistory(false);
+        }
+      }
+    };
+
+    hydrate();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [db]);
 
   const sendMessage = useCallback(
     async (text: string, provider: AIProvider) => {
-      if (!text.trim() || isStreaming) return;
+      if (!text.trim() || isStreaming || isLoadingHistory) return;
 
       const userMsg: ChatMessage = {
-        id: Date.now().toString(),
+        id: generateMessageId("user"),
         role: "user",
         content: text,
       };
 
       const assistantMsg: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: generateMessageId("assistant"),
         role: "assistant",
         content: "",
+      };
+
+      const assistantMsgFinal: ChatMessage = {
+        ...assistantMsg,
       };
 
       setMessages((prev) => [...prev, userMsg, assistantMsg]);
@@ -96,6 +138,7 @@ export function useChat() {
 
               switch (event.type) {
                 case "text":
+                  assistantMsgFinal.content += event.content;
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === assistantMsg.id
@@ -106,6 +149,14 @@ export function useChat() {
                   break;
 
                 case "tool_call":
+                  assistantMsgFinal.toolCalls = [
+                    ...(assistantMsgFinal.toolCalls || []),
+                    {
+                      id: event.id,
+                      name: event.name,
+                      status: "pending",
+                    },
+                  ];
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === assistantMsg.id
@@ -126,6 +177,10 @@ export function useChat() {
                   break;
 
                 case "tool_result":
+                  assistantMsgFinal.toolCalls = (assistantMsgFinal.toolCalls || []).map(
+                    (tc) =>
+                      tc.id === event.id ? { ...tc, status: "done" } : tc
+                  );
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === assistantMsg.id && m.toolCalls
@@ -141,6 +196,7 @@ export function useChat() {
                   break;
 
                 case "error":
+                  assistantMsgFinal.content = `Error: ${event.message}`;
                   setMessages((prev) =>
                     prev.map((m) =>
                       m.id === assistantMsg.id
@@ -161,6 +217,7 @@ export function useChat() {
         }
       } catch (error) {
         if ((error as Error).name !== "AbortError") {
+          assistantMsgFinal.content = `Error: ${(error as Error).message}`;
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMsg.id
@@ -173,11 +230,17 @@ export function useChat() {
           );
         }
       } finally {
+        try {
+          await persistMessages(db, [userMsg, assistantMsgFinal]);
+        } catch (error) {
+          console.warn("[Chat] Failed to persist chat turn", error);
+        }
+
         setIsStreaming(false);
         abortRef.current = null;
       }
     },
-    [messages, isStreaming]
+    [db, isLoadingHistory, messages, isStreaming]
   );
 
   const cancelStream = useCallback(() => {
@@ -185,8 +248,24 @@ export function useChat() {
   }, []);
 
   const clearMessages = useCallback(() => {
-    setMessages([]);
-  }, []);
+    const clear = async () => {
+      setMessages([]);
+      try {
+        await clearPersistedMessages(db);
+      } catch (error) {
+        console.warn("[Chat] Failed to clear persisted history", error);
+      }
+    };
 
-  return { messages, isStreaming, sendMessage, cancelStream, clearMessages };
+    void clear();
+  }, [db]);
+
+  return {
+    messages,
+    isStreaming,
+    isLoadingHistory,
+    sendMessage,
+    cancelStream,
+    clearMessages,
+  };
 }

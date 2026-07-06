@@ -93,6 +93,16 @@ This checklist hardens the v1 architecture without changing the core three-servi
 | 4 | Support multiple tool status indicators in one assistant turn | Prevents overwriting when model emits several tool calls | ✅ Implemented |
 | 5 | Align docs/config examples with code behavior | Avoids onboarding/runtime mismatch | ✅ Implemented |
 
+## Feature Update: Conversation Persistence
+
+- Status: ✅ Implemented (client-side)
+- Storage engine: `expo-sqlite`
+- Persistence scope: single local conversation thread
+- Lifecycle:
+    - history is hydrated on app startup
+    - each completed chat turn (user + assistant) is persisted
+    - clear action deletes both in-memory and persisted history
+
 ## v2 Implementation Plan
 
 ### Phase 1 — Backend Reliability

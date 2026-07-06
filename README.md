@@ -228,6 +228,7 @@ At least one provider key is required for chat. If a request targets a provider 
 ## Roadmap
 
 - [ ] **Conversation persistence** — store chat history (SQLite, file-based, or cloud)
+- [x] **Conversation persistence** — store chat history in local SQLite (Expo app)
 - [ ] **Multiple chat sessions** — create, switch, and delete conversation threads
 - [ ] **Additional MCP tools** — web search, file system access, database queries, calendar
 - [ ] **Vision support** — image upload + analysis via multimodal models (GPT-4o, Claude)
