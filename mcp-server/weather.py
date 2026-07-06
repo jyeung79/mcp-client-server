@@ -4,7 +4,7 @@ import httpx
 from mcp.server.fastmcp import FastMCP
 
 # Initialize FastMCP server
-mcp = FastMCP("weather")
+mcp = FastMCP("weather", host="0.0.0.0", port=8001)
 
 # Constants
 NWS_API_BASE_URL = "https://api.weather.gov"
@@ -91,5 +91,10 @@ Forecast: {period["detailedForecast"]}
     return "\n---\n".join(forecasts)
 
 
+def main():
+    """Entry point for the weather MCP server."""
+    mcp.run(transport="streamable-http")
+
+
 if __name__ == "__main__":
-    mcp.run(transport="streamable-http", host="0.0.0.0", port=8001)
+    main()

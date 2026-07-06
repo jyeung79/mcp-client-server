@@ -9,3 +9,9 @@ dependencies = [
     "mcp[cli]>=1.28.1",
     "uvicorn>=0.30.0",
 ]
+
+[project.scripts]
+weather-mcp = "weather:main"
+
+[tool.setuptools]
+py-modules = ["weather"]
