@@ -1,6 +1,19 @@
+import { Platform } from "react-native";
 import { useCallback, useRef, useState } from "react";
 
-const BACKEND_URL = "http://localhost:3001/chat";
+const DEFAULT_BACKEND_BASE_URL = Platform.select({
+  android: "http://10.0.2.2:3001",
+  default: "http://localhost:3001",
+});
+
+function normalizeBaseUrl(url: string): string {
+  return url.endsWith("/") ? url.slice(0, -1) : url;
+}
+
+const BACKEND_BASE_URL = normalizeBaseUrl(
+  process.env.EXPO_PUBLIC_BACKEND_URL || DEFAULT_BACKEND_BASE_URL
+);
+const BACKEND_URL = `${BACKEND_BASE_URL}/chat`;
 
 export type MessageRole = "user" | "assistant" | "tool";
 
@@ -8,8 +21,8 @@ export interface ChatMessage {
   id: string;
   role: MessageRole;
   content: string;
-  /** Tool call indicator shown inline */
-  toolCall?: { name: string; status: "pending" | "done" };
+  /** Tool call indicators shown inline */
+  toolCalls?: { id: string; name: string; status: "pending" | "done" }[];
 }
 
 export type AIProvider = "openai" | "anthropic";
@@ -98,10 +111,14 @@ export function useChat() {
                       m.id === assistantMsg.id
                         ? {
                             ...m,
-                            toolCall: {
-                              name: event.name,
-                              status: "pending",
-                            },
+                            toolCalls: [
+                              ...(m.toolCalls || []),
+                              {
+                                id: event.id,
+                                name: event.name,
+                                status: "pending",
+                              },
+                            ],
                           }
                         : m
                     )
@@ -111,10 +128,12 @@ export function useChat() {
                 case "tool_result":
                   setMessages((prev) =>
                     prev.map((m) =>
-                      m.id === assistantMsg.id && m.toolCall
+                      m.id === assistantMsg.id && m.toolCalls
                         ? {
                             ...m,
-                            toolCall: { ...m.toolCall, status: "done" },
+                            toolCalls: m.toolCalls.map((tc) =>
+                              tc.id === event.id ? { ...tc, status: "done" } : tc
+                            ),
                           }
                         : m
                     )

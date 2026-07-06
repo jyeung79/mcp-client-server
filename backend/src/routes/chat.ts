@@ -1,5 +1,5 @@
 import { Router, type Request, type Response } from "express";
-import { createAdapter, type ChatMessage, type ToolCall } from "../ai/adapter.js";
+import { createAdapter, type ChatMessage } from "../ai/adapter.js";
 import { config } from "../config.js";
 import type { MCPClient } from "../mcp/client.js";
 
@@ -17,13 +17,18 @@ export function createChatRouter(mcpClient: MCPClient): Router {
       return;
     }
 
-    const aiProvider = (provider === "anthropic" ? "anthropic" : "openai") as
-      | "openai"
-      | "anthropic";
+    const aiProvider = provider === "anthropic" ? "anthropic" : "openai";
     const apiKey =
-      aiProvider === "openai"
-        ? config.openaiApiKey
-        : config.anthropicApiKey;
+      aiProvider === "openai" ? config.openaiApiKey : config.anthropicApiKey;
+
+    if (!apiKey) {
+      res.status(400).json({
+        error: `Missing API key for provider \"${aiProvider}\". Set ${
+          aiProvider === "openai" ? "OPENAI_API_KEY" : "ANTHROPIC_API_KEY"
+        }.`,
+      });
+      return;
+    }
 
     // Set up Streamable HTTP response with NDJSON
     res.setHeader("Content-Type", "application/x-ndjson");
@@ -63,12 +68,12 @@ export function createChatRouter(mcpClient: MCPClient): Router {
           break;
         }
 
-        // Build the assistant message with tool calls
-        // For OpenAI format we store it differently, but for our unified format
-        // we'll add the text content as the assistant message
+        // Build assistant message and preserve tool-call metadata for
+        // provider replay semantics (especially OpenAI).
         conversation.push({
           role: "assistant",
           content: result.content || "",
+          assistantToolCalls: result.toolCalls,
         });
 
         // Execute each tool call

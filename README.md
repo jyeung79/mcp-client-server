@@ -132,7 +132,7 @@ python weather.py
 ```bash
 cd backend
 cp .env.example .env
-# Edit .env with your API keys:
+# Edit .env with your API keys (at least one):
 #   OPENAI_API_KEY=sk-...
 #   ANTHROPIC_API_KEY=sk-ant-...
 
@@ -145,6 +145,8 @@ npm run dev
 
 ```bash
 cd mcp-client
+# Optional: override backend URL for real devices/emulators
+# EXPO_PUBLIC_BACKEND_URL=http://localhost:3001
 npm install
 npx expo start
 # Press 'i' for iOS simulator, 'a' for Android, or 'w' for web
@@ -214,6 +216,14 @@ Streaming chat endpoint (NDJSON).
 | `ANTHROPIC_API_KEY` | *if using Anthropic* | — | Anthropic API key |
 | `MCP_SERVER_URL` | No | `http://localhost:8001/mcp` | MCP server Streamable HTTP URL |
 | `PORT` | No | `3001` | Backend server port |
+
+At least one provider key is required for chat. If a request targets a provider whose key is missing, `/chat` returns a provider-specific error.
+
+### Frontend Environment Variables
+
+| Variable | Required | Default | Description |
+|----------|----------|---------|-------------|
+| `EXPO_PUBLIC_BACKEND_URL` | No | Platform default (`http://localhost:3001`, Android emulator: `http://10.0.2.2:3001`) | Base URL for proxy backend |
 
 ## Roadmap
 

@@ -27,13 +27,15 @@ export function ChatBubble({ message, isStreaming }: Props) {
           styles.bubble,
           isUser ? styles.bubbleUser : styles.bubbleAssistant,
         ]}>
-        {isAssistant && message.toolCall && (
+        {isAssistant && message.toolCalls && message.toolCalls.length > 0 && (
           <ThemedView style={styles.toolCall}>
-            <ThemedText type="small" themeColor="textSecondary">
-              {message.toolCall.status === "pending"
-                ? `🔧 Calling ${message.toolCall.name}...`
-                : `✅ ${message.toolCall.name} complete`}
-            </ThemedText>
+            {message.toolCalls.map((toolCall) => (
+              <ThemedText key={toolCall.id} type="small" themeColor="textSecondary">
+                {toolCall.status === "pending"
+                  ? `🔧 Calling ${toolCall.name}...`
+                  : `✅ ${toolCall.name} complete`}
+              </ThemedText>
+            ))}
           </ThemedView>
         )}
 

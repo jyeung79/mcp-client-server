@@ -3,6 +3,11 @@ export interface ChatMessage {
   content: string;
   toolCallId?: string;
   name?: string;
+  /**
+   * Provider-level assistant tool calls emitted in the previous turn.
+   * Required for OpenAI conversation replay semantics.
+   */
+  assistantToolCalls?: ToolCall[];
 }
 
 export interface ToolDefinition {

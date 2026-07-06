@@ -71,3 +71,50 @@ sequenceDiagram
     App-->>User: Streamed response text
     Backend-->>App: {"type":"done"}
 ```
+
+## Target Architecture v2 Checklist
+
+This checklist hardens the v1 architecture without changing the core three-service topology.
+
+### Goals
+
+- Keep the same service boundaries (**client**, **backend**, **MCP server**)
+- Improve provider reliability and portability
+- Preserve tool-calling semantics across provider loops
+- Improve UX when multiple tools are called in one turn
+
+### Checklist (Reviewed + Implemented)
+
+| # | Item | Why | Status |
+|---|------|-----|--------|
+| 1 | Provider key strategy supports one-or-many providers | Startup should not fail when only one provider is configured | ✅ Implemented |
+| 2 | Preserve OpenAI assistant `tool_calls` in replayed conversation | Required for robust multi-step tool loops | ✅ Implemented |
+| 3 | Make app backend URL configurable | Needed for device/emulator portability | ✅ Implemented |
+| 4 | Support multiple tool status indicators in one assistant turn | Prevents overwriting when model emits several tool calls | ✅ Implemented |
+| 5 | Align docs/config examples with code behavior | Avoids onboarding/runtime mismatch | ✅ Implemented |
+
+## v2 Implementation Plan
+
+### Phase 1 — Backend Reliability
+
+1. Make provider API keys optional in config loading.
+2. Validate selected provider key at request-time in `POST /chat`.
+3. Return clear provider-specific error if key is missing.
+
+### Phase 2 — Tool Loop Correctness
+
+1. Extend backend chat message model with assistant tool-call metadata.
+2. Persist assistant tool calls into conversation history before tool results.
+3. Rehydrate OpenAI `assistant.tool_calls` when replaying messages.
+
+### Phase 3 — Client Networking + UX
+
+1. Add `EXPO_PUBLIC_BACKEND_URL` support in chat hook.
+2. Provide platform defaults (Android emulator uses `10.0.2.2`).
+3. Track and render multiple tool statuses per assistant message.
+
+### Phase 4 — Documentation + DX
+
+1. Add backend `.env.example`.
+2. Update setup/config docs to reflect one-or-many provider key model.
+3. Document frontend backend URL environment variable.

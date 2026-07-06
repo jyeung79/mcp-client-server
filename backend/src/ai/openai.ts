@@ -37,6 +37,22 @@ export class OpenAIAdapter implements ChatAdapter {
             content: m.content,
           };
         }
+
+        if (m.role === "assistant" && m.assistantToolCalls?.length) {
+          return {
+            role: "assistant" as const,
+            content: m.content || null,
+            tool_calls: m.assistantToolCalls.map((tc) => ({
+              id: tc.id,
+              type: "function" as const,
+              function: {
+                name: tc.name,
+                arguments: JSON.stringify(tc.arguments),
+              },
+            })),
+          };
+        }
+
         return {
           role: m.role as "user" | "assistant",
           content: m.content,
