@@ -103,6 +103,22 @@ This checklist hardens the v1 architecture without changing the core three-servi
     - each completed chat turn (user + assistant) is persisted
     - clear action deletes both in-memory and persisted history
 
+## Feature Update: Multi-session History (`conversation_id`)
+
+- Status: ✅ Implemented
+- Data model:
+    - `conversations` table stores session metadata (`id`, `title`, `created_at`, `updated_at`)
+    - `chat_messages` now includes `conversation_id`
+- Migration:
+    - schema version bumped to v2
+    - existing v1 messages are migrated into a default conversation
+- UI behavior:
+    - create a new session (`+ New`)
+    - switch between sessions (session chips)
+    - rename active session
+    - delete active session (with confirmation)
+    - messages are loaded and persisted per active session
+
 ## v2 Implementation Plan
 
 ### Phase 1 — Backend Reliability
