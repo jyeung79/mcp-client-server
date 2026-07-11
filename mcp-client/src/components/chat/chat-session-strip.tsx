@@ -1,15 +1,8 @@
 import { useMemo, useState } from "react";
-import {
-  Alert,
-  ScrollView,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Alert, ScrollView, TextInput, TouchableOpacity, View } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
-import { Spacing } from "@/constants/theme";
+import { ClassNames } from "@/constants/theme";
 import type { ConversationSummary } from "@/hooks/use-chat";
 
 interface Props {
@@ -83,28 +76,28 @@ export function ChatSessionStrip({
   };
 
   return (
-    <View style={styles.wrapper}>
-      <View style={styles.container}>
+    <View className="border-b border-gray-400/40">
+      <View className="flex-row items-center gap-2 px-4 pb-1 pt-2">
         <ScrollView
           horizontal
           showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.list}>
+          contentContainerStyle={{ gap: 8 }}>
           {conversations.map((conversation, index) => {
             const isActive = conversation.id === currentConversationId;
             return (
               <TouchableOpacity
                 key={conversation.id}
-                style={[styles.sessionChip, isActive && styles.sessionChipActive]}
+                className={`flex-row items-center gap-1 ${
+                  isActive ? ClassNames.chipActive : ClassNames.chip
+                }`}
                 onPress={() => onSelectConversation(conversation.id)}
                 disabled={isDisabled || isRenaming}>
-                <ThemedText
-                  type="small"
-                  style={isActive ? styles.sessionTextActive : styles.sessionText}>
+                <ThemedText type="small" className={isActive ? "text-white" : "text-gray-600"}>
                   {shortLabel(conversation, index)}
                 </ThemedText>
                 <ThemedText
                   type="small"
-                  style={isActive ? styles.countTextActive : styles.countText}>
+                  className={isActive ? "text-white/90" : "text-gray-500"}>
                   {conversation.messageCount}
                 </ThemedText>
               </TouchableOpacity>
@@ -113,31 +106,33 @@ export function ChatSessionStrip({
         </ScrollView>
 
         <TouchableOpacity
-          style={[styles.newBtn, isDisabled && styles.newBtnDisabled]}
+          className={`rounded-full border border-gray-400/40 px-2 py-1 ${
+            isDisabled ? "opacity-50" : ""
+          }`}
           onPress={onNewConversation}
           disabled={isDisabled || isRenaming}>
-          <ThemedText type="small" style={styles.newBtnText}>
+          <ThemedText type="small" className="text-primary">
             + New
           </ThemedText>
         </TouchableOpacity>
       </View>
 
       {activeConversation && !isRenaming && (
-        <View style={styles.actionsRow}>
+        <View className="flex-row gap-2 px-4 pb-2">
           <TouchableOpacity
-            style={styles.actionBtn}
+            className="rounded-lg border border-gray-400/40 px-2 py-1"
             onPress={handleStartRename}
             disabled={isDisabled}>
-            <ThemedText type="small" style={styles.actionBtnText}>
+            <ThemedText type="small" className="text-primary">
               Rename
             </ThemedText>
           </TouchableOpacity>
 
           <TouchableOpacity
-            style={styles.actionBtn}
+            className="rounded-lg border border-gray-400/40 px-2 py-1"
             onPress={handleDelete}
             disabled={isDisabled}>
-            <ThemedText type="small" style={styles.deleteBtnText}>
+            <ThemedText type="small" className="text-destructive">
               Delete
             </ThemedText>
           </TouchableOpacity>
@@ -145,9 +140,9 @@ export function ChatSessionStrip({
       )}
 
       {activeConversation && isRenaming && (
-        <View style={styles.renameRow}>
+        <View className="flex-row items-center gap-2 px-4 pb-2">
           <TextInput
-            style={styles.renameInput}
+            className="h-9 flex-1 rounded-lg border border-gray-400/40 bg-gray-400/10 px-2 text-black"
             value={renameDraft}
             onChangeText={setRenameDraft}
             placeholder="Session name"
@@ -156,18 +151,18 @@ export function ChatSessionStrip({
             editable={!isDisabled}
           />
           <TouchableOpacity
-            style={styles.renameActionBtn}
+            className="rounded-lg border border-gray-400/40 px-2 py-1"
             onPress={handleSaveRename}
             disabled={!renameDraft.trim() || isDisabled}>
-            <ThemedText type="small" style={styles.renameSaveText}>
+            <ThemedText type="small" className="text-primary">
               Save
             </ThemedText>
           </TouchableOpacity>
           <TouchableOpacity
-            style={styles.renameActionBtn}
+            className="rounded-lg border border-gray-400/40 px-2 py-1"
             onPress={handleCancelRename}
             disabled={isDisabled}>
-            <ThemedText type="small" style={styles.renameCancelText}>
+            <ThemedText type="small" className="text-gray-600">
               Cancel
             </ThemedText>
           </TouchableOpacity>
@@ -176,109 +171,3 @@ export function ChatSessionStrip({
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  wrapper: {
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(128,128,128,0.3)",
-  },
-  container: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.one,
-  },
-  list: {
-    gap: Spacing.two,
-  },
-  sessionChip: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.one,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-    borderRadius: 999,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-  },
-  sessionChipActive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
-  },
-  sessionText: {
-    color: "#666",
-  },
-  sessionTextActive: {
-    color: "#fff",
-  },
-  countText: {
-    color: "#999",
-  },
-  countTextActive: {
-    color: "rgba(255,255,255,0.9)",
-  },
-  newBtn: {
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-    borderRadius: 999,
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-  },
-  newBtnDisabled: {
-    opacity: 0.5,
-  },
-  newBtnText: {
-    color: "#007AFF",
-  },
-  actionsRow: {
-    flexDirection: "row",
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingBottom: Spacing.two,
-  },
-  actionBtn: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.two,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-  },
-  actionBtnText: {
-    color: "#007AFF",
-  },
-  deleteBtnText: {
-    color: "#D92D20",
-  },
-  renameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.two,
-    paddingHorizontal: Spacing.three,
-    paddingBottom: Spacing.two,
-  },
-  renameInput: {
-    flex: 1,
-    height: 36,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-    borderRadius: Spacing.two,
-    paddingHorizontal: Spacing.two,
-    backgroundColor: "rgba(128,128,128,0.08)",
-    color: "#000",
-  },
-  renameActionBtn: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.two,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-  },
-  renameSaveText: {
-    color: "#007AFF",
-  },
-  renameCancelText: {
-    color: "#666",
-  },
-});

@@ -1,3 +1,7 @@
+@config '../tailwind.config.js';
+@import 'tailwindcss';
+@import 'uniwind';
+
 :root {
   --font-display:
     Spline Sans, Inter, ui-sans-serif, system-ui, sans-serif, Apple Color Emoji, Segoe UI Emoji,

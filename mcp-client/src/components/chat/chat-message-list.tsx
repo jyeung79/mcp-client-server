@@ -1,8 +1,7 @@
 import { useEffect, useRef } from "react";
-import { FlatList, StyleSheet, View } from "react-native";
+import { FlatList, View } from "react-native";
 
 import { ChatBubble } from "./chat-bubble";
-import { Spacing } from "@/constants/theme";
 import type { ChatMessage } from "@/hooks/use-chat";
 
 interface Props {
@@ -23,7 +22,7 @@ export function ChatMessageList({ messages, isStreaming }: Props) {
   }, [messages.length, messages[messages.length - 1]?.content]);
 
   if (messages.length === 0) {
-    return <View style={styles.empty} />;
+    return <View className="flex-1" />;
   }
 
   return (
@@ -41,19 +40,10 @@ export function ChatMessageList({ messages, isStreaming }: Props) {
           }
         />
       )}
-      contentContainerStyle={styles.list}
+      contentContainerStyle={{ paddingVertical: 8 }}
       onContentSizeChange={() =>
         listRef.current?.scrollToEnd({ animated: false })
       }
     />
   );
 }
-
-const styles = StyleSheet.create({
-  list: {
-    paddingVertical: Spacing.two,
-  },
-  empty: {
-    flex: 1,
-  },
-});

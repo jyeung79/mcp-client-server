@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import {
-  StyleSheet,
   TextInput,
   TouchableOpacity,
   View,
@@ -10,7 +9,6 @@ import {
 
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
 import type { AIProvider } from "@/hooks/use-chat";
 
 interface Props {
@@ -42,41 +40,37 @@ export function ChatInput({
   };
 
   return (
-    <ThemedView style={styles.container}>
+    <ThemedView className="border-t border-gray-400/40 px-4 pb-4 pt-2">
       {/* Provider toggle */}
-      <View style={styles.providerRow}>
+      <View className="mb-2 flex-row gap-2">
         <TouchableOpacity
-          style={[
-            styles.providerBtn,
-            provider === "openai" && styles.providerBtnActive,
-          ]}
+          className={`rounded-lg border px-2 py-1 ${
+            provider === "openai" ? "border-primary bg-primary" : "border-gray-400/40"
+          }`}
           onPress={() => onProviderChange("openai")}
           disabled={isStreaming}>
-          <ThemedText
-            type="small"
-            style={provider === "openai" && styles.providerTextActive}>
+          <ThemedText type="small" className={provider === "openai" ? "text-white" : ""}>
             OpenAI
           </ThemedText>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[
-            styles.providerBtn,
-            provider === "anthropic" && styles.providerBtnActive,
-          ]}
+          className={`rounded-lg border px-2 py-1 ${
+            provider === "anthropic" ? "border-primary bg-primary" : "border-gray-400/40"
+          }`}
           onPress={() => onProviderChange("anthropic")}
           disabled={isStreaming}>
           <ThemedText
             type="small"
-            style={provider === "anthropic" && styles.providerTextActive}>
+            className={provider === "anthropic" ? "text-white" : ""}>
             Anthropic
           </ThemedText>
         </TouchableOpacity>
       </View>
 
       {/* Input row */}
-      <View style={styles.inputRow}>
+      <View className="flex-row items-end gap-2">
         <TextInput
-          style={styles.input}
+          className="max-h-[120px] min-h-10 flex-1 rounded-3xl bg-gray-400/10 px-4 py-2 text-base leading-6 text-black"
           value={input}
           onChangeText={setInput}
           onSubmitEditing={handleSubmitEditing}
@@ -87,74 +81,14 @@ export function ChatInput({
           returnKeyType="send"
         />
         <TouchableOpacity
-          style={[styles.sendBtn, !input.trim() && styles.sendBtnDisabled]}
+          className={`h-10 w-10 items-center justify-center rounded-full ${
+            input.trim() ? "bg-primary" : "bg-primary/40"
+          }`}
           onPress={handleSend}
           disabled={!input.trim() || isStreaming}>
-          <ThemedText style={styles.sendBtnText}>↑</ThemedText>
+          <ThemedText className="text-[20px] font-bold text-white">↑</ThemedText>
         </TouchableOpacity>
       </View>
     </ThemedView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: Spacing.three,
-    paddingTop: Spacing.two,
-    paddingBottom: Spacing.three,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: "rgba(128,128,128,0.3)",
-  },
-  providerRow: {
-    flexDirection: "row",
-    gap: Spacing.two,
-    marginBottom: Spacing.two,
-  },
-  providerBtn: {
-    paddingHorizontal: Spacing.two,
-    paddingVertical: Spacing.one,
-    borderRadius: Spacing.two,
-    borderWidth: 1,
-    borderColor: "rgba(128,128,128,0.3)",
-  },
-  providerBtnActive: {
-    backgroundColor: "#007AFF",
-    borderColor: "#007AFF",
-  },
-  providerTextActive: {
-    color: "#ffffff",
-  },
-  inputRow: {
-    flexDirection: "row",
-    alignItems: "flex-end",
-    gap: Spacing.two,
-  },
-  input: {
-    flex: 1,
-    minHeight: 40,
-    maxHeight: 120,
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.four,
-    fontSize: 16,
-    lineHeight: 22,
-    backgroundColor: "rgba(128,128,128,0.1)",
-    color: "#000",
-  },
-  sendBtn: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#007AFF",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  sendBtnDisabled: {
-    backgroundColor: "rgba(0,122,255,0.3)",
-  },
-  sendBtnText: {
-    color: "#ffffff",
-    fontSize: 20,
-    fontWeight: "bold",
-  },
-});

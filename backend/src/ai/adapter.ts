@@ -1,3 +1,7 @@
+import { createRequire } from "module";
+
+const require = createRequire(import.meta.url);
+
 export interface ChatMessage {
   role: "user" | "assistant" | "tool";
   content: string;

@@ -1,9 +1,9 @@
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 
 import { ChatStreamingText } from "./chat-streaming-text";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { Spacing } from "@/constants/theme";
+import { ClassNames } from "@/constants/theme";
 import type { ChatMessage } from "@/hooks/use-chat";
 
 interface Props {
@@ -16,19 +16,14 @@ export function ChatBubble({ message, isStreaming }: Props) {
   const isAssistant = message.role === "assistant";
 
   return (
-    <View
-      style={[
-        styles.row,
-        isUser ? styles.rowRight : styles.rowLeft,
-      ]}>
+    <View className={`px-4 py-1 ${isUser ? "items-end" : "items-start"}`}>
       <ThemedView
         type="backgroundElement"
-        style={[
-          styles.bubble,
-          isUser ? styles.bubbleUser : styles.bubbleAssistant,
-        ]}>
+        className={`max-w-[80%] rounded-2xl px-4 py-2 ${
+          isUser ? "rounded-br bg-primary" : "rounded-bl"
+        }`}>
         {isAssistant && message.toolCalls && message.toolCalls.length > 0 && (
-          <ThemedView style={styles.toolCall}>
+          <ThemedView className="mb-2 border-b border-gray-400/40 pb-2">
             {message.toolCalls.map((toolCall) => (
               <ThemedText key={toolCall.id} type="small" themeColor="textSecondary">
                 {toolCall.status === "pending"
@@ -45,43 +40,12 @@ export function ChatBubble({ message, isStreaming }: Props) {
             isStreaming={isStreaming}
           />
         ) : (
-          <ThemedText style={styles.text}>{message.content}</ThemedText>
+          <ThemedText
+            className={`${ClassNames.bodyLineHeight} ${isUser ? "text-white" : ""}`.trim()}>
+            {message.content}
+          </ThemedText>
         )}
       </ThemedView>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  row: {
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.one,
-  },
-  rowRight: {
-    alignItems: "flex-end",
-  },
-  rowLeft: {
-    alignItems: "flex-start",
-  },
-  bubble: {
-    maxWidth: "80%",
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.two,
-    borderRadius: Spacing.three,
-  },
-  bubbleUser: {
-    borderBottomRightRadius: Spacing.one,
-  },
-  bubbleAssistant: {
-    borderBottomLeftRadius: Spacing.one,
-  },
-  toolCall: {
-    paddingBottom: Spacing.two,
-    marginBottom: Spacing.two,
-    borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: "rgba(128,128,128,0.3)",
-  },
-  text: {
-    lineHeight: 22,
-  },
-});

@@ -16,6 +16,23 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npx expo start
    ```
 
+## Styling system (Uniwind / Tailwind-like)
+
+This app uses **Uniwind** (Tailwind-style utility classes for React Native).
+
+### Key files
+
+- `metro.config.js` — wraps Metro with `withUniwindConfig(...)`
+- `tailwind.config.js` — central Tailwind theme tokens
+- `src/global.css` — Uniwind/Tailwind imports
+- `src/constants/theme.ts` — shared app theme values + central reusable class tokens (`ClassNames`)
+
+### How to style components
+
+- Use `className` on React Native components (for example: `View`, `Text`, `Pressable`)
+- Prefer shared class tokens from `ClassNames` when patterns repeat across screens/components
+- Use inline `style` only for dynamic runtime values or unsupported style props
+
 In the output, you'll find options to open the app in a
 
 - [development build](https://docs.expo.dev/develop/development-builds/introduction/)

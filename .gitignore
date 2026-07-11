@@ -1,9 +1,34 @@
 node_modules/
 env/
-.env.*
-.env
 build/
+dist/
+
+# Secrets / env files
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p8
+*.p12
+*.jks
+*.mobileprovision
 
 # Python
 __pycache__/
 *.py[cod]
+.venv/
+*.egg-info/
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Node / TypeScript
+*.tsbuildinfo
+
+# Expo / Metro
+.expo/
+.metro-health-check*
+
+# Uniwind generated typings
+**/uniwind-types.d.ts

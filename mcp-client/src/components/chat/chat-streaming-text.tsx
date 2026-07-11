@@ -1,7 +1,8 @@
 import { useEffect, useRef } from "react";
-import { Animated, StyleSheet } from "react-native";
+import { Animated } from "react-native";
 
 import { ThemedText } from "@/components/themed-text";
+import { ClassNames } from "@/constants/theme";
 
 interface Props {
   text: string;
@@ -36,22 +37,13 @@ export function ChatStreamingText({ text, isStreaming }: Props) {
   if (!text && !isStreaming) return null;
 
   return (
-    <ThemedText style={styles.text}>
+    <ThemedText className={ClassNames.bodyLineHeight}>
       {text}
       {isStreaming && (
-        <Animated.Text style={[styles.cursor, { opacity: cursorOpacity }]}>
+        <Animated.Text className="text-primary" style={{ opacity: cursorOpacity }}>
           ▍
         </Animated.Text>
       )}
     </ThemedText>
   );
 }
-
-const styles = StyleSheet.create({
-  text: {
-    lineHeight: 22,
-  },
-  cursor: {
-    color: "#007AFF",
-  },
-});
